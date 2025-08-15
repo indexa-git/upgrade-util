@@ -56,6 +56,22 @@ def uninstall_modules(cr):
         'account_followup_features',
         'l10n_do_account_followup',
         'setu_advance_inventory_reports',
+        'incocegla_product_label_zebra_printer',
+        'l10n_do_ecf_xsd_bypass',
+        'l10n_do_ecf_document_type_enable',
+        'l10n_do_ecf_certificate',
+        'l10n_do_ecf_cashier',
+        'sale_pos_backend_invoice_template',
+        'l10n_do_partner',
+        'web_gantt_view',
+        'product_quantity_update_force_inventory',
+        'account_move_line_auto_reconcile_hook',
+        'pos_reprint',
+        'l10n_do_purchase',
+        'base_partner_fields',
+        'stock_account_product_cost_security',
+        'product_code_unique',
+        'account_ecf_auto_post',
     ]
 
     for module_name in modules_to_uninstall:
