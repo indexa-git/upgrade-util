@@ -81,7 +81,6 @@ def migrate(cr, version):
         'l10n_do_accounting.report_invoice_with_payments',
         'l10n_do_accounting.res_config_settings_view_form',
         'l10n_do_accounting.view_account_move_reversal_inherited',
-        'l10n_do_accounting.view_move_form',
         'l10n_do_ecf_invoicing.view_move_form_inherited',
         'l10n_do_ecf_invoicing.res_config_settings_view_form',
         'l10n_do_hr.view_hr_job_form',
