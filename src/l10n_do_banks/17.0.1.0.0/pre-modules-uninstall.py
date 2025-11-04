@@ -81,6 +81,12 @@ def uninstall_modules(cr):
         'stock_account_product_cost_security',
         'product_code_unique',
         'account_ecf_auto_post',
+        'qztray_base',
+        'professional_templates',
+        'stock_available_unreserved',
+        'product_warehouse_quantity',
+        'sale_discount_limit',
+        'sales_product_warehouse_quantity',
     ]
 
     for module_name in modules_to_uninstall:
