@@ -15,6 +15,36 @@ def delete_advanced_web_domain_widget_assets(cr):
         asset.unlink()
     _logger.info("Advanced Web Domain Widget assets deleted")
 
+def delete_ks_dashboard_ninja_assets(cr):
+    """
+    Script to delete ks_dashboard_ninja assets.
+    """
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    assets = env['ir.asset'].search([('name', 'like', 'ks_dashboard_ninja.assets_backend%')])
+    for asset in assets:
+        asset.unlink()
+    _logger.info("Dashboard Ninja assets deleted")
+
+def delete_report_xlsx_assets(cr):
+    """
+    Script to delete report_xlsx assets.
+    """
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    assets = env['ir.asset'].search([('name', 'like', 'report_xlsx.assets_backend%')])
+    for asset in assets:
+        asset.unlink()
+    _logger.info("Report xlsx assets deleted")
+
+def delete_web_m2x_options_assets(cr):
+    """
+    Script to delete web_m2x_options assets.
+    """
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    assets = env['ir.asset'].search([('name', 'like', 'web_m2x_options.assets_backend%')])
+    for asset in assets:
+        asset.unlink()
+    _logger.info("Web m2x options assets deleted")
+
 def deactivate_studio_views(cr):
     """
     Script de post-migración para buscar y desactivar vistas de Studio.
