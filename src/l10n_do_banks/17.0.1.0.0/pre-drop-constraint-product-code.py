@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import logging
 from odoo.addons.base.maintenance.migrations import util
+import logging
 
 _logger = logging.getLogger(__name__)
 
@@ -9,12 +9,11 @@ _logger = logging.getLogger(__name__)
 def migrate(cr, version):
     """
     Pre-migration script to drop the unique constraint on product_product.default_code.
-
-    This script removes the constraint 'product_product_default_code_uniq' from the
-    product_product table, but only when the module 'product_code_unique' has been
-    uninstalled and there is no data in `product_product.default_code`.
     
-    The constraint is only dropped if:
+    This script removes the constraint 'product_product_default_code_uniq' from the
+    product_product table to allow duplicate default codes.
+    
+    This script only runs when:
     - The module 'product_code_unique' is installed
     - There are products without code in the default_code field
     
@@ -24,12 +23,12 @@ def migrate(cr, version):
     """
     _logger.info('Starting pre-migration: dropping product_product.default_code unique constraint')
     
-    # Check if module product_code_unique is installed
+    # Check if product_code_unique module is installed
     if not util.module_installed(cr, 'product_code_unique'):
-        _logger.info('Module product_code_unique is not installed. Skipping migration.')
+        _logger.info('Module product_code_unique is not installed. Skipping constraint drop.')
         return
     
-    _logger.info('Module product_code_unique is installed. Checking for products without code.')
+    _logger.info('Module product_code_unique is installed. Checking for products without code...')
     
     # Check if there are products without code in default_code
     cr.execute("""
@@ -41,45 +40,12 @@ def migrate(cr, version):
     products_without_code = cr.fetchone()[0]
     
     if products_without_code == 0:
-        _logger.info('No products found without code in default_code. Skipping constraint drop.')
+        _logger.info('No products without code found. Skipping constraint drop.')
         return
     
-    _logger.info(f'Found {products_without_code} products without code. Proceeding to drop constraint.')
+    _logger.info(f'Found {products_without_code} products without code. Proceeding with constraint drop.')
     
     try:
-        cr.execute(
-            """
-            SELECT state
-            FROM ir_module_module
-            WHERE name = 'product_code_unique'
-            ORDER BY id DESC
-            LIMIT 1
-            """
-        )
-        module_row = cr.fetchone()
-
-        if module_row and module_row[0] not in ('uninstalled', 'uninstallable'):
-            _logger.info(
-                "Skipping constraint drop because module product_code_unique is not uninstalled"
-            )
-            return
-
-        cr.execute(
-            """
-            SELECT COUNT(*)
-            FROM product_product
-            WHERE COALESCE(default_code, '') != ''
-            """
-        )
-        default_code_count = cr.fetchone()[0]
-
-        if default_code_count > 0:
-            _logger.info(
-                "Skipping constraint drop because %s products have default_code set",
-                default_code_count,
-            )
-            return
-
         # Check if constraint exists before attempting to drop it
         cr.execute("""
             SELECT 1 
