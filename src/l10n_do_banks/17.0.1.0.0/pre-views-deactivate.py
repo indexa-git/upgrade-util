@@ -17,6 +17,9 @@ def migrate(cr, version):
     views_to_deactivate = [
         'portal.frontend_layout',
         'purchase_request.view_purchase_request_tree',
+        'crm_claim_customizations.crm_case_claims_tree_view_customization_inherit',
+        'crm_claim_service.crm_claim_telco_form_view_inherit',
+        'crm_claim_service.crm_case_claims_form_view_inherit'
     ]
 
     for xml_id in views_to_deactivate:
