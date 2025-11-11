@@ -25,6 +25,7 @@ def migrate(cr, version):
         'studio_customization.odoo_studio_warranty_5e101e7c-e388-4589-b9b8-628b03ca43f1',
         'studio_customization.odoo_studio_warranty_64540003-0f78-4e15-8bba-6d3475418fed',
         'product_product_price_widget.product_product_tree_view_inherit_widget',
+        'purchase_request.view_purchase_request_tree',
     ]
 
     for xml_id in views_to_delete:

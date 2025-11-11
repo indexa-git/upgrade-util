@@ -16,6 +16,7 @@ def migrate(cr, version):
 
     views_to_deactivate = [
         'portal.frontend_layout',
+        'purchase_request.view_purchase_request_tree',
     ]
 
     for xml_id in views_to_deactivate:
