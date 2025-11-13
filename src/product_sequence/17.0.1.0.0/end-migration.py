@@ -22,9 +22,7 @@ DUPLICATES_SQL = """
 
 def migrate(cr, version):
     """Recreate the unique constraint on product_product.default_code."""
-    _logger.info('=' * 80)
     _logger.info('POST-MIGRATION: Restoring %s on %s.default_code', CONSTRAINT_NAME, TABLE_NAME)
-    _logger.info('=' * 80)
 
     cr.execute(CONSTRAINT_EXISTS_SQL, (CONSTRAINT_NAME, TABLE_NAME))
     if cr.fetchone():

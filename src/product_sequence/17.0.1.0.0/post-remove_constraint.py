@@ -10,9 +10,7 @@ CONSTRAINT_NAME = 'product_product_default_code_uniq'
 
 def migrate(cr, version):
     """Drop the product default_code unique constraint when needed."""
-    _logger.info('=' * 80)
     _logger.info('PRE-MIGRATION: Dropping %s constraint', CONSTRAINT_NAME)
-    _logger.info('=' * 80)
 
     if not util.module_installed(cr, 'product_code_unique'):
         _logger.info('Module product_code_unique is not installed. Nothing to do.')
