@@ -15,6 +15,7 @@ def delete_advanced_web_domain_widget_assets(cr):
         asset.unlink()
     _logger.info("Advanced Web Domain Widget assets deleted")
 
+
 def delete_ks_dashboard_ninja_assets(cr):
     """
     Script to delete ks_dashboard_ninja assets.
@@ -24,6 +25,7 @@ def delete_ks_dashboard_ninja_assets(cr):
     for asset in assets:
         asset.unlink()
     _logger.info("Dashboard Ninja assets deleted")
+
 
 def delete_report_xlsx_assets(cr):
     """
@@ -35,6 +37,7 @@ def delete_report_xlsx_assets(cr):
         asset.unlink()
     _logger.info("Report xlsx assets deleted")
 
+
 def delete_web_m2x_options_assets(cr):
     """
     Script to delete web_m2x_options assets.
@@ -44,6 +47,7 @@ def delete_web_m2x_options_assets(cr):
     for asset in assets:
         asset.unlink()
     _logger.info("Web m2x options assets deleted")
+
 
 def deactivate_studio_views(cr):
     """
@@ -77,23 +81,24 @@ def deactivate_studio_views(cr):
     for view in studio_views:
         try:
             view_obj = env['ir.ui.view'].browse(view['id'])
-            
+
             inherited_views = env['ir.ui.view'].search([
                 ('inherit_id', '=', view_obj.id),
                 ('active', '=', True)
             ])
-            
+
             for inherited in inherited_views:
                 inherited.write({'active': False, 'inherit_id': False})
                 _logger.info(f"Inherited View Deactivated: {inherited.name} (ID: {inherited.id})")
-            
+
             view_obj.write({'active': False, 'inherit_id': False})
-            _logger.info(f"View Deactivated and Inherited Deactivated: {view['name']} (ID: {view['id']})")            
+            _logger.info(f"View Deactivated and Inherited Deactivated: {view['name']} (ID: {view['id']})")
             env.cr.commit()
-            
+
         except Exception as e:
             _logger.warning(f"Error deactivating view {view['name']} (ID: {view['id']}): {e}")
-    
+
+
 def deactivate_automated_actions(cr):
     """
     Script on end-migration to deactivate automated actions.
@@ -103,10 +108,10 @@ def deactivate_automated_actions(cr):
     """
 
     env = api.Environment(cr, SUPERUSER_ID, {})
-    
+
     # Get all active automated actions
     automated_actions = env['base.automation'].search([('active', '=', True)])
-    
+
     # Deactivate each automated action
     for action in automated_actions:
         try:
@@ -114,11 +119,10 @@ def deactivate_automated_actions(cr):
             _logger.info(f"Automated action deactivated: {action.name} (ID: {action.id})")
         except Exception as e:
             _logger.error(f"Error deactivating automated action {action.name} (ID: {action.id}): {e}")
-    
-    
 
 
 def migrate(cr, version):
     delete_advanced_web_domain_widget_assets(cr)
     deactivate_studio_views(cr)
     deactivate_automated_actions(cr)
+
