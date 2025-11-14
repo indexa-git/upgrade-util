@@ -81,6 +81,9 @@ def uninstall_modules(cr):
         'stock_account_product_cost_security',
         'product_code_unique',
         'account_ecf_auto_post',
+        'sh_product_qrcode_generator',
+        'sh_barcode_scanner_no_mrp',
+        'product_multiple_barcodes',
     ]
 
     for module_name in modules_to_uninstall:
