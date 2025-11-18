@@ -81,6 +81,9 @@ def uninstall_modules(cr):
         'stock_account_product_cost_security',
         'product_code_unique',
         'account_ecf_auto_post',
+        'payroll_dynamic_xls_report',
+        'l10n_do_accounting_migration_scripts',
+        'stock_mts_mto_rule',
     ]
 
     for module_name in modules_to_uninstall:
