@@ -87,7 +87,9 @@ def uninstall_modules(cr):
         'account_invoice_overdue_reminder',
         'mrp_analytic',
         'product_export_with_images',
-        'serial_number_report'
+        'serial_number_report',
+        'purchase_discount',
+        'purchase_analytic_global',
     ]
 
     for module_name in modules_to_uninstall:
