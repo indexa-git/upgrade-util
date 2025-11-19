@@ -84,6 +84,10 @@ def uninstall_modules(cr):
         'payroll_dynamic_xls_report',
         'l10n_do_accounting_migration_scripts',
         'stock_mts_mto_rule',
+        'account_invoice_overdue_reminder',
+        'mrp_analytic',
+        'product_export_with_images',
+        'serial_number_report'
     ]
 
     for module_name in modules_to_uninstall:
