@@ -5,6 +5,47 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+def _cleanup_qztray_data(cr):
+    """Remove qztray printer records that block keypair deletion.
+
+    Some databases have a NOT NULL constraint on ``qztray_printer.keypair_id``
+    while the foreign key uses ``ON DELETE SET NULL``. When uninstalling the
+    qztray modules, the upgrade utility tries to delete records from
+    ``qztray_keypair``, which triggers ``SET NULL`` on ``qztray_printer`` and
+    crashes on the NOT NULL constraint.
+
+    We proactively delete the printer records that reference any keypair so the
+    module uninstall can proceed.
+    """
+    # Solo ejecutamos esta limpieza si el módulo qztray_printer (o qztray)
+    # está instalado en la base de datos.
+    if not (
+        util.module_installed(cr, "qztray_printer")
+        or util.module_installed(cr, "qztray")
+    ):
+        _logger.debug(
+            "qztray_printer/qztray no instalados; se omite la limpieza previa."
+        )
+        return
+
+    try:
+        cr.execute(
+            """
+                DELETE FROM qztray_printer
+                WHERE keypair_id IN (SELECT id FROM qztray_keypair)
+            """
+        )
+        _logger.info("Deleted qztray_printer records referencing qztray_keypair.")
+    except Exception:
+        # If tables don't exist or deletion fails, ignore and let normal
+        # uninstall logic handle it.
+        _logger.debug(
+            "qztray_printer/qztray_keypair tables not found or deletion failed, "
+            "continuing with module uninstall.",
+            exc_info=True,
+        )
+
+
 def uninstall_modules(cr):
     """
     Script to uninstall modules that are no longer needed or compatible with version 17.0.
@@ -117,4 +158,5 @@ def uninstall_modules(cr):
 
 
 def migrate(cr, version):
+    _cleanup_qztray_data(cr)
     uninstall_modules(cr)
