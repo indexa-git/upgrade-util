@@ -87,6 +87,27 @@ def uninstall_modules(cr):
         'product_warehouse_quantity',
         'sale_discount_limit',
         'sales_product_warehouse_quantity',
+        'account_invoice_migration_scripts',
+        'alan_customize',
+        'config_interface',
+        'database_cleanup',
+        'dev_sale_product_stock_restrict',
+        'interface_invoicing',
+        'ncf_sale',
+        'negative_stock_sale',
+        'non_moving_product_ept',
+        'payment_backend_refund',
+        'product_hide_sale_cost_price',
+        'protocol_message',
+        'qztray',
+        'qztray_base',
+        'qztray_location_labels',
+        'qztray_partner_labels',
+        'qztray_product_inventory',
+        'qztray_product_labels',
+        'qztray_product_purchase',
+        'required_requested_date',
+        'stock_inventory_chatter'
     ]
 
     for module_name in modules_to_uninstall:
