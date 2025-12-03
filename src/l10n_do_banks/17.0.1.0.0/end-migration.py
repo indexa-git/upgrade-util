@@ -17,6 +17,8 @@ def delete_custom_assets(cr):
     - ncf_manager
     - interface_invoicing
     - protocol_message
+    - dgii_reports
+    - l10n_do_ecommerce
 
     """
     env = api.Environment(cr, SUPERUSER_ID, {})
@@ -26,11 +28,14 @@ def delete_custom_assets(cr):
         ('ks_dashboard_ninja.assets_backend%', "Dashboard Ninja assets deleted"),
         ('report_xlsx.assets_backend%', "Report xlsx assets deleted"),
         ('web_m2x_options.assets_backend%', "Web m2x options assets deleted"),
-        ('alan_customize.%', "Alan Customize assets deleted"),
+        ('alan_customize%', "Alan Customize assets deleted"),
         ('qztray_base.assets_backend%', "QZ Tray Base assets deleted"),
         ('ncf_manager.assets_backend%', "NCF Manager assets deleted"),
         ('interface_invoicing.%', "Interface Invoicing assets deleted"),
         ('protocol_message.%', "Protocol Message assets deleted"),
+        ('dgii_reports%', "DGII Reports assets deleted"),
+        ('l10n_do_ecommerce%', "Ecommerce assets deleted"),
+        ('web_editor%', "Custom assets deleted"),
     ]
 
     for name_pattern, log_message in assets_to_delete:
