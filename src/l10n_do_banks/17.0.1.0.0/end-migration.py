@@ -5,48 +5,39 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def delete_advanced_web_domain_widget_assets(cr):
+def delete_custom_assets(cr):
     """
-    Script to delete advanced_web_domain_widget assets.
+    Script to delete several custom backend assets:
+    - advanced_web_domain_widget
+    - ks_dashboard_ninja
+    - report_xlsx
+    - web_m2x_options
+    - alan_customize
+    - qztray_base
+    - ncf_manager
+    - interface_invoicing
+    - protocol_message
+
     """
     env = api.Environment(cr, SUPERUSER_ID, {})
-    assets = env['ir.asset'].search([('name', 'like', 'advanced_web_domain_widget.assets_backend%')])
-    for asset in assets:
-        asset.unlink()
-    _logger.info("Advanced Web Domain Widget assets deleted")
 
+    assets_to_delete = [
+        ('advanced_web_domain_widget.assets_backend%', "Advanced Web Domain Widget assets deleted"),
+        ('ks_dashboard_ninja.assets_backend%', "Dashboard Ninja assets deleted"),
+        ('report_xlsx.assets_backend%', "Report xlsx assets deleted"),
+        ('web_m2x_options.assets_backend%', "Web m2x options assets deleted"),
+        ('alan_customize.%', "Alan Customize assets deleted"),
+        ('qztray_base.assets_backend%', "QZ Tray Base assets deleted"),
+        ('ncf_manager.assets_backend%', "NCF Manager assets deleted"),
+        ('interface_invoicing.%', "Interface Invoicing assets deleted"),
+        ('protocol_message.%', "Protocol Message assets deleted"),
+    ]
 
-def delete_ks_dashboard_ninja_assets(cr):
-    """
-    Script to delete ks_dashboard_ninja assets.
-    """
-    env = api.Environment(cr, SUPERUSER_ID, {})
-    assets = env['ir.asset'].search([('name', 'like', 'ks_dashboard_ninja.assets_backend%')])
-    for asset in assets:
-        asset.unlink()
-    _logger.info("Dashboard Ninja assets deleted")
-
-
-def delete_report_xlsx_assets(cr):
-    """
-    Script to delete report_xlsx assets.
-    """
-    env = api.Environment(cr, SUPERUSER_ID, {})
-    assets = env['ir.asset'].search([('name', 'like', 'report_xlsx.assets_backend%')])
-    for asset in assets:
-        asset.unlink()
-    _logger.info("Report xlsx assets deleted")
-
-
-def delete_web_m2x_options_assets(cr):
-    """
-    Script to delete web_m2x_options assets.
-    """
-    env = api.Environment(cr, SUPERUSER_ID, {})
-    assets = env['ir.asset'].search([('name', 'like', 'web_m2x_options.assets_backend%')])
-    for asset in assets:
-        asset.unlink()
-    _logger.info("Web m2x options assets deleted")
+    for name_pattern, log_message in assets_to_delete:
+        assets = env['ir.asset'].search([('name', 'like', name_pattern)])
+        for asset in assets:
+            asset.unlink()
+        _logger.info(log_message)
 
 
 def deactivate_studio_views(cr):
@@ -122,7 +113,7 @@ def deactivate_automated_actions(cr):
 
 
 def migrate(cr, version):
-    delete_advanced_web_domain_widget_assets(cr)
+    delete_custom_assets(cr)
     deactivate_studio_views(cr)
     deactivate_automated_actions(cr)
 
