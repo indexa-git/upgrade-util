@@ -149,6 +149,7 @@ def uninstall_modules(cr):
         'qztray_product_purchase',
         'required_requested_date',
         'stock_inventory_chatter'
+        'cecomsa_account_followup',
     ]
 
     for module_name in modules_to_uninstall:
