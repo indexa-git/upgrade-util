@@ -196,5 +196,17 @@ def uninstall_modules(cr):
 
 
 def migrate(cr, version):
-    _cleanup_qztray_data(cr)
-    uninstall_modules(cr)
+    _logger.info("=== Starting pre-modules-uninstall migration ===")
+    try:
+        _logger.info("Step 1: Running qztray cleanup...")
+        _cleanup_qztray_data(cr)
+        _logger.info("Step 2: qztray cleanup completed, starting module uninstallation...")
+        uninstall_modules(cr)
+        _logger.info("=== Pre-modules-uninstall migration completed successfully ===")
+    except Exception as e:
+        _logger.error(
+            "=== ERROR in pre-modules-uninstall migration: %s ===",
+            e,
+            exc_info=True
+        )
+        raise
