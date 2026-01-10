@@ -1,5 +1,4 @@
 from odoo.addons.base.maintenance.migrations import util
-from odoo import api, SUPERUSER_ID
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -165,10 +164,35 @@ def uninstall_modules(cr):
         'web_favicon',
     ]
 
+    _logger.info(f'Starting uninstall process for {len(modules_to_uninstall)} modules.')
+    
+    uninstalled_count = 0
+    not_installed_count = 0
+    failed_count = 0
+
     for module_name in modules_to_uninstall:
-        if util.module_installed(cr, module_name):
-            util.uninstall_module(cr, module_name)
-            _logger.info(f'Successfuly module uninstalled {module_name}.')
+        try:
+            if util.module_installed(cr, module_name):
+                _logger.info(f'Attempting to uninstall module: {module_name}')
+                util.uninstall_module(cr, module_name)
+                uninstalled_count += 1
+                _logger.info(f'Successfully uninstalled module: {module_name}.')
+            else:
+                not_installed_count += 1
+                _logger.debug(f'Module {module_name} is not installed, skipping.')
+        except Exception as e:
+            failed_count += 1
+            _logger.error(
+                f'Failed to uninstall module {module_name}: {str(e)}',
+                exc_info=True
+            )
+    
+    _logger.info(
+        f'Uninstall process completed. '
+        f'Uninstalled: {uninstalled_count}, '
+        f'Not installed: {not_installed_count}, '
+        f'Failed: {failed_count}'
+    )
 
 
 def migrate(cr, version):
