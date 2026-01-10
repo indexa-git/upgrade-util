@@ -129,6 +129,7 @@ def uninstall_modules(cr):
         'account_invoice_migration_scripts',
         'alan_customize',
         'config_interface',
+        'auto_backup_cm',
         'database_cleanup',
         'dev_sale_product_stock_restrict',
         'interface_invoicing',
@@ -137,6 +138,7 @@ def uninstall_modules(cr):
         'payment_backend_refund',
         'product_hide_sale_cost_price',
         'protocol_message',
+        'bpd_payroll_txt',
         'qztray',
         'qztray_base',
         'qztray_location_labels',
@@ -146,8 +148,20 @@ def uninstall_modules(cr):
         'qztray_product_purchase',
         'required_requested_date',
         'stock_inventory_chatter',
-        'cecomsa_account_followup',
         'odoo_document_invoice_report',
+        'cecomsa_account_followup',
+        'account_check_printing_report_base',
+        'base_export_manager',
+        'cm_partner_aging',
+        'hr_employee_id',
+        'hr_payroll_cancel',
+        'ncf_manager',
+        'odoo_microsoft_account',
+        'org_chart_premium',
+        'web_domain_field',
+        'web_export_view',
+        'web_no_crawler',
+        'web_favicon',
     ]
 
     _logger.info(f'Starting uninstall process for {len(modules_to_uninstall)} modules.')
@@ -182,5 +196,17 @@ def uninstall_modules(cr):
 
 
 def migrate(cr, version):
-    _cleanup_qztray_data(cr)
-    uninstall_modules(cr)
+    _logger.info("=== Starting pre-modules-uninstall migration ===")
+    try:
+        _logger.info("Step 1: Running qztray cleanup...")
+        _cleanup_qztray_data(cr)
+        _logger.info("Step 2: qztray cleanup completed, starting module uninstallation...")
+        uninstall_modules(cr)
+        _logger.info("=== Pre-modules-uninstall migration completed successfully ===")
+    except Exception as e:
+        _logger.error(
+            "=== ERROR in pre-modules-uninstall migration: %s ===",
+            e,
+            exc_info=True
+        )
+        raise
