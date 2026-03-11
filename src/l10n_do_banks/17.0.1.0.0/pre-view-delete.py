@@ -65,4 +65,26 @@ def migrate(cr, version):
         except Exception as e:
             _logger.warning(f'Error deleting view {xml_id}: {e}')
 
+    # Archivar la vista portal.frontend_layout
+    def archive_views():
+        """
+        Pre-migration script to archive views
+        """
+        xml_id = [
+        'portal.frontend_layout'
+        ]
+    
+        try:
+            view = env.ref(xml_id)
+            if view:
+                _logger.info(f'Archiving view: {xml_id}')
+                view.active = False
+                _logger.info(f'Successfully archived view: {xml_id}')
+            else:
+                _logger.info(f'View to archive not found: {xml_id}')
+        except Exception as e:
+            _logger.warning(f'Error archiving view {xml_id}: {e}')
+    
+    archive_views()
+
     _logger.info('Finished pre-migration view deletion')
