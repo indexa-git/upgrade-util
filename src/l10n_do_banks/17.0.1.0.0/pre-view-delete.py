@@ -15,10 +15,10 @@ def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
 
     views_to_delete = [
-        'bi_warranty_registration.warranty_details_form_view'
+        'bi_warranty_registration.warranty_details_form_view',
         'bi_warranty_registration.warranty_case_claims_form_view1',
         'product_product_price_widget.product_product_tree_view_inherit_widget',
-        'sale_stock_product_price_widget.sale_price_widgets_view', 
+        'sale_stock_product_price_widget.sale_price_widgets_view',
         'sale_stock_qty_date_widgets.sale_stock_qty_date_widgets_view',
         'product_stock_qty_date_widget.product_product_tree_view_inherit_widget_qty',
         'warranty_registration_extra_features.warranty_case_claims_form_view1_inherit',
@@ -30,6 +30,10 @@ def migrate(cr, version):
         'professional_templates.view_sale_order_inherit_customized',
         'professional_templates.view_rfq_inherit_customized',
         'professional_templates.purchase_order_inherited_customized',
+        'purchase_request.view_purchase_request_tree',
+        'crm_claim_customizations.crm_case_claims_tree_view_customization_inherit',
+        'crm_claim_service.crm_claim_telco_form_view_inherit',
+        'crm_claim_service.crm_case_claims_form_view_inherit',
     ]
 
     for xml_id in views_to_delete:
@@ -60,5 +64,27 @@ def migrate(cr, version):
                 _logger.info(f'View not found: {xml_id}')
         except Exception as e:
             _logger.warning(f'Error deleting view {xml_id}: {e}')
+
+    # Archivar la vista portal.frontend_layout
+    def archive_views():
+        """
+        Pre-migration script to archive views
+        """
+        xml_id = [
+        'portal.frontend_layout'
+        ]
+    
+        try:
+            view = env.ref(xml_id)
+            if view:
+                _logger.info(f'Archiving view: {xml_id}')
+                view.active = False
+                _logger.info(f'Successfully archived view: {xml_id}')
+            else:
+                _logger.info(f'View to archive not found: {xml_id}')
+        except Exception as e:
+            _logger.warning(f'Error archiving view {xml_id}: {e}')
+    
+    archive_views()
 
     _logger.info('Finished pre-migration view deletion')
