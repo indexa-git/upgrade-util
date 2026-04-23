@@ -32,12 +32,17 @@ _MERGES = [
 
 
 def migrate(cr, version):
-    # Force-install the replacement module BEFORE merging so that
-    # account_reconcile_payment is still in 'installed' state for the check.
+    # Force-install replacement modules BEFORE merging so that
+    # account_reconcile_payment is still in 'installed' state for the checks.
     mig_util.force_install_module(
         cr,
         "l10n_do_account_withholding_tax",
         if_installed=["account_reconcile_payment"],
+    )
+    mig_util.force_install_module(
+        cr,
+        "l10n_do_withholding_certification",
+        if_installed=["l10n_do_account_withholding_tax"],
     )
 
     for old_module, into_module in _MERGES:
