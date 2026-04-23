@@ -20,6 +20,7 @@ Affects (for each merge):
 import logging
 
 from odoo.upgrade import util
+from odoo.addons.base.maintenance.migrations import util as mig_util
 
 _logger = logging.getLogger(__name__)
 
@@ -31,6 +32,14 @@ _MERGES = [
 
 
 def migrate(cr, version):
+    # Force-install the replacement module BEFORE merging so that
+    # account_reconcile_payment is still in 'installed' state for the check.
+    mig_util.force_install_module(
+        cr,
+        "l10n_do_account_withholding_tax",
+        if_installed=["account_reconcile_payment"],
+    )
+
     for old_module, into_module in _MERGES:
         util.merge_module(cr, old_module, into_module)
         _logger.info("Module merged: %r → %r", old_module, into_module)
