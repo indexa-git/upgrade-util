@@ -15,9 +15,7 @@ def ensure_compensation_columns(cr):
     for table, column, col_type, default in _COMPENSATION_COLUMNS:
         if not util.column_exists(cr, table, column):
             _logger.info("Adding missing column %s.%s", table, column)
-            cr.execute(
-                f"ALTER TABLE {table} ADD COLUMN {column} {col_type} DEFAULT {default}"
-            )
+            cr.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type} DEFAULT {default}")
 
 
 def uninstall_modules(cr):
@@ -32,6 +30,7 @@ def uninstall_modules(cr):
         "hr_employee_relative",
         "account_payment_cash_custom_workflow",
         "looker_connector",
+        "stock_account_fields_tracking",
     ]
 
     _logger.info("Starting uninstall process for %d modules.", len(modules_to_uninstall))
@@ -60,6 +59,7 @@ def uninstall_modules(cr):
         not_installed_count,
         failed_count,
     )
+
 
 def migrate(cr, version):
     ensure_compensation_columns(cr)
