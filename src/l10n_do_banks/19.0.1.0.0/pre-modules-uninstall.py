@@ -23,6 +23,7 @@ def uninstall_modules(cr):
     modules_to_uninstall = [
         "recurring_sale_order_app",
         "recurring_sale_order_app_features",
+        "l10n_do_hr_maintenance",
         "l10n_do_hr_fleet",
         "l10n_do_hr_course",
         "l10n_do_hr_recurrent_news",
