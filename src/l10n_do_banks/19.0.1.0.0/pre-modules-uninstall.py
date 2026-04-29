@@ -21,7 +21,8 @@ def ensure_compensation_columns(cr):
 def uninstall_modules(cr):
     """Uninstall modules that are no longer needed or compatible with version 19.0."""
     modules_to_uninstall = [
-        "l10n_do_hr_maintenance",
+        "recurring_sale_order_app",
+        "recurring_sale_order_app_features",
         "l10n_do_hr_fleet",
         "l10n_do_hr_course",
         "l10n_do_hr_recurrent_news",
