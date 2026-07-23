@@ -34,7 +34,6 @@ def uninstall_modules(cr):
         "l10n_do_sign_to_xml",
         "hr_course",
         "advanced_web_domain_widget",
-        "hr_employee_relative",
         "looker_connector",
         "stock_account_fields_tracking",
         "account_invoice_rate",
