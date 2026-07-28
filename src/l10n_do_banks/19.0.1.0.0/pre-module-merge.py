@@ -19,15 +19,15 @@ Affects (for each merge):
 
 import logging
 
-from odoo.upgrade import util
 from odoo.addons.base.maintenance.migrations import util as mig_util
+from odoo.upgrade import util
 
 _logger = logging.getLogger(__name__)
 
 _MERGES = [
     ("account_auto_transfer_features", "account_transfer_features"),
     ("payment_azul", "payment_azul_webpages"),
-    ("account_reconcile_payment", "l10n_do_account_withholding_tax")
+    ("account_reconcile_payment", "l10n_do_account_withholding_tax"),
 ]
 
 
