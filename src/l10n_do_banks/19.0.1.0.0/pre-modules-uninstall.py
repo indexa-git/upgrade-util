@@ -41,6 +41,7 @@ def uninstall_modules(cr):
         "sale_product_template_tags",
         "product_cost_security",
         "l10n_do_credit_note_ecf",
+        "l10n_do_ecf_reception",
         "sale_discount_display_amount",
         "simplify_access_management",
     ]
