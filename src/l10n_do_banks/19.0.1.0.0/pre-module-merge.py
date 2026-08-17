@@ -9,6 +9,7 @@ before any model/view loading takes place.
 Merges performed:
   - account_auto_transfer_features → account_transfer_features
   - payment_azul                   → payment_azul_webpages
+  - stock_analytic (OCA)           → stock_analytic_distribution_features
 
 Affects (for each merge):
   - ir_module_module          — module registry entry
@@ -28,6 +29,7 @@ _MERGES = [
     ("account_auto_transfer_features", "account_transfer_features"),
     ("payment_azul", "payment_azul_webpages"),
     ("account_reconcile_payment", "l10n_do_account_withholding_tax"),
+    ("stock_analytic", "stock_analytic_distribution_features"),
 ]
 
 
