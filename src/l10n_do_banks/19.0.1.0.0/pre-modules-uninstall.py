@@ -43,6 +43,12 @@ def uninstall_modules(cr):
         "l10n_do_credit_note_ecf",
         "sale_discount_display_amount",
         "simplify_access_management",
+        # windiescorp modules discarded during the 13.0 -> 19.0 migration
+        "multiple_delivery_products",
+        "serial_traceability_lifedate",
+        "serial_traceability_remove_date",
+        "stock_inventory_forecasted_report",
+        "windies_invoice_template_stock",
     ]
 
     _logger.info("Starting uninstall process for %d modules.", len(modules_to_uninstall))
