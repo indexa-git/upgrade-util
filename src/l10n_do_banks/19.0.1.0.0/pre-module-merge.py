@@ -33,6 +33,12 @@ _MERGES = [
 ]
 
 
+def _known_modules(cr, names):
+    """Return the subset of ``names`` present in ``ir_module_module``."""
+    cr.execute("SELECT name FROM ir_module_module WHERE name IN %s", [tuple(names)])
+    return {name for (name,) in cr.fetchall()}
+
+
 def migrate(cr, version):
 
     # Force-install replacement modules BEFORE merging so that
@@ -48,6 +54,17 @@ def migrate(cr, version):
         if_installed=["l10n_do_account_withholding_tax"],
     )
 
+    known = _known_modules(cr, [module for merge in _MERGES for module in merge])
+
     for old_module, into_module in _MERGES:
+        missing = [module for module in (old_module, into_module) if module not in known]
+        if missing:
+            _logger.warning(
+                "Skipping merge %r → %r: module(s) not in this database: %s",
+                old_module,
+                into_module,
+                ", ".join(missing),
+            )
+            continue
         util.merge_module(cr, old_module, into_module)
         _logger.info("Module merged: %r → %r", old_module, into_module)
