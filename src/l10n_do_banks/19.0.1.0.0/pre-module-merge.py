@@ -68,3 +68,6 @@ def migrate(cr, version):
             continue
         util.merge_module(cr, old_module, into_module)
         _logger.info("Module merged: %r → %r", old_module, into_module)
+
+    if util.force_noupdate(cr, "payment_azul_webpages.payment_method_azul"):
+        _logger.info("Kept legacy Azul payment method: xmlid flagged noupdate")
