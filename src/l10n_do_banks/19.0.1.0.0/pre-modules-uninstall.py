@@ -9,8 +9,6 @@ _COMPENSATION_COLUMNS = [
     ("res_company", "compensation_default_percentage_sale_base", "NUMERIC", "1"),
     ("res_company", "compensation_default_profit_percentage_sale_base", "NUMERIC", "1"),
 ]
-
-
 MODULE_TO_INSTALL = "user_default_iot_printer"
 
 
@@ -52,7 +50,6 @@ def uninstall_modules(cr):
         "serial_traceability_remove_date",
         "stock_inventory_forecasted_report",
         "windies_invoice_template_stock",
-        # QZ Tray document printing, replaced by user_default_iot_printer
         "odoo_document_printer_customization_base",
         "odoo_document_printer",
     ]
