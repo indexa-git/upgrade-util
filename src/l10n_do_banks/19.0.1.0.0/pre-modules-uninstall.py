@@ -11,6 +11,9 @@ _COMPENSATION_COLUMNS = [
 ]
 
 
+MODULE_TO_INSTALL = "user_default_iot_printer"
+
+
 def ensure_compensation_columns(cr):
     for table, column, col_type, default in _COMPENSATION_COLUMNS:
         if not util.column_exists(cr, table, column):
@@ -55,6 +58,9 @@ def uninstall_modules(cr):
         "website_product_brands",
         "website_product_sorting_and_shopping",
         "windies_invoice_template_stock",
+        # QZ Tray document printing, replaced by user_default_iot_printer
+        "odoo_document_printer_customization_base",
+        "odoo_document_printer",
     ]
 
     _logger.info("Starting uninstall process for %d modules.", len(modules_to_uninstall))
@@ -85,6 +91,13 @@ def uninstall_modules(cr):
     )
 
 
+def install_modules(cr):
+    """Install the modules that replace the ones retired above."""
+    util.force_install_module(cr, MODULE_TO_INSTALL)
+    _logger.info("Successfully installed module: %s.", MODULE_TO_INSTALL)
+
+
 def migrate(cr, version):
     ensure_compensation_columns(cr)
     uninstall_modules(cr)
+    install_modules(cr)
