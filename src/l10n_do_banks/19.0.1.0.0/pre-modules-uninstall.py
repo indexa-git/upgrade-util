@@ -45,10 +45,15 @@ def uninstall_modules(cr):
         "simplify_access_management",
         "stock_mts_mto_rule",
         # windiescorp modules discarded during the 13.0 -> 19.0 migration
+        "account_multicurrency_reconcile_patch",
         "multiple_delivery_products",
+        "purchase_discount",
         "serial_traceability_lifedate",
         "serial_traceability_remove_date",
         "stock_inventory_forecasted_report",
+        "website_base_filter_attribute",
+        "website_product_brands",
+        "website_product_sorting_and_shopping",
         "windies_invoice_template_stock",
     ]
 
