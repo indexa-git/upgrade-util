@@ -46,6 +46,13 @@ def uninstall_modules(cr):
         "simplify_access_management",
         "stock_mts_mto_rule",
         "pos_lot_selection",
+        # Installed on 17.0 databases but unloadable on 19.0, which leaves them stuck in
+        # `to upgrade` and makes the loader log "Some modules have inconsistent states".
+        # l10n_do_ecf_reception was never migrated (it stays at 17.0 with installable=False,
+        # superseded by l10n_do_ecf_purchase_reception) and fastapi_auth_api_key no longer
+        # ships in OCA/rest-framework. Both are removed by hand today.
+        "l10n_do_ecf_reception",
+        "fastapi_auth_api_key",
         # windiescorp modules discarded during the 13.0 -> 19.0 migration
         "account_multicurrency_reconcile_patch",
         "multiple_delivery_products",
