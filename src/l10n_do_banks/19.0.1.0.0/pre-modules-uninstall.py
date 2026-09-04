@@ -43,6 +43,7 @@ def uninstall_modules(cr):
         "l10n_do_credit_note_ecf",
         "sale_discount_display_amount",
         "simplify_access_management",
+        "stock_mts_mto_rule",
         # windiescorp modules discarded during the 13.0 -> 19.0 migration
         "multiple_delivery_products",
         "serial_traceability_lifedate",
