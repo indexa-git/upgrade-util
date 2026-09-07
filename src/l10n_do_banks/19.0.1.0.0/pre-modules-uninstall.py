@@ -50,6 +50,11 @@ def uninstall_modules(cr):
         "serial_traceability_remove_date",
         "stock_inventory_forecasted_report",
         "windies_invoice_template_stock",
+        "account_multicurrency_reconcile_patch",
+        "website_base_filter_attribute",
+        "website_product_brands",
+        "purchase_discount",
+        "website_product_sorting_and_shopping",
     ]
 
     _logger.info("Starting uninstall process for %d modules.", len(modules_to_uninstall))
