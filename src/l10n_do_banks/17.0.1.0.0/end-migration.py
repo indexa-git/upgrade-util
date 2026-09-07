@@ -19,6 +19,12 @@ def delete_custom_assets(cr):
     - protocol_message
     - dgii_reports
     - l10n_do_ecommerce
+    - account_report_profit_loss_monthly_detail
+    - multiple_delivery_products
+    - products_in_multiple
+    - website_product_brands
+    - website_product_sorting_and_shopping
+    - windies_ecommerce
 
     """
     env = api.Environment(cr, SUPERUSER_ID, {})
@@ -36,6 +42,15 @@ def delete_custom_assets(cr):
         ('dgii_reports%', "DGII Reports assets deleted"),
         ('l10n_do_ecommerce%', "Ecommerce assets deleted"),
         ('web_editor%', "Custom assets deleted"),
+        # windiescorp modules discarded during the 13.0 -> 19.0 migration: their
+        # view-generated assets survive as ir.asset rows pointing at views that
+        # no longer exist, and break the asset bundles on load.
+        ('account_report_profit_loss_monthly_detail.%', "Profit & Loss monthly detail assets deleted"),
+        ('multiple_delivery_products.%', "Multiple Delivery Products assets deleted"),
+        ('products_in_multiple.%', "Products In Multiple assets deleted"),
+        ('website_product_brands.%', "Website Product Brands assets deleted"),
+        ('website_product_sorting_and_shopping.%', "Website Product Sorting And Shopping assets deleted"),
+        ('windies_ecommerce.%', "Windies Ecommerce assets deleted"),
     ]
 
     for name_pattern, log_message in assets_to_delete:
