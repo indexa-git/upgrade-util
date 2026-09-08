@@ -45,6 +45,7 @@ def uninstall_modules(cr):
         "sale_discount_display_amount",
         "simplify_access_management",
         "stock_mts_mto_rule",
+        "pos_lot_selection",
         # windiescorp modules discarded during the 13.0 -> 19.0 migration
         "account_multicurrency_reconcile_patch",
         "multiple_delivery_products",
