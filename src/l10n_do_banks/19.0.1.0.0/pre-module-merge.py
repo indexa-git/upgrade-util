@@ -20,6 +20,8 @@ Affects (for each merge):
 
 import logging
 
+import odoo
+
 from odoo.addons.base.maintenance.migrations import util as mig_util
 from odoo.upgrade import util
 
@@ -31,6 +33,22 @@ _MERGES = [
     ("account_reconcile_payment", "l10n_do_account_withholding_tax"),
     ("stock_analytic", "stock_analytic_distribution_features"),
 ]
+
+
+_LEFTOVER_CODE_ERROR = (
+    "Cannot merge module %(old)r into %(into)r: the code of %(old)r is still in the "
+    "addons path of this upgrade.\n"
+    "`util.merge_module` deletes the `ir_module_module` row of %(old)r, but Odoo built "
+    "the module graph before this script ran, so it still loads %(old)r afterwards. Its "
+    "constraint reflection then resolves `module` to NULL and the upgrade dies with:\n"
+    '  null value in column "module" of relation "ir_model_constraint" '
+    "violates not-null constraint\n"
+    "Keep the retired module out of the addons path of the upgrade branch and run "
+    "the upgrade again. For `stock_analytic`, that means pinning the "
+    "OCA/account-analytic submodule to a commit without it: OCA migrated that "
+    "module to 19.0, and it is the very module "
+    "`stock_analytic_distribution_features` replaces."
+)
 
 
 def _known_modules(cr, names):
@@ -55,6 +73,7 @@ def migrate(cr, version):
     )
 
     known = _known_modules(cr, [module for merge in _MERGES for module in merge])
+    on_disk = set(odoo.modules.get_modules())
 
     for old_module, into_module in _MERGES:
         missing = [module for module in (old_module, into_module) if module not in known]
@@ -66,6 +85,11 @@ def migrate(cr, version):
                 ", ".join(missing),
             )
             continue
+        if old_module in on_disk:
+            # The graph of this upgrade already holds `old_module` as a node, so deleting
+            # its module row here makes the later `init_models` reflect constraints with
+            # a NULL module. Fail loud and early instead.
+            raise util.MigrationError(_LEFTOVER_CODE_ERROR % {"old": old_module, "into": into_module})
         util.merge_module(cr, old_module, into_module)
         _logger.info("Module merged: %r → %r", old_module, into_module)
 
