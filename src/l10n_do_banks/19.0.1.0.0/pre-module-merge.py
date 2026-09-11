@@ -11,13 +11,15 @@ Merges performed:
   - payment_azul                   → payment_azul_webpages
   - account_reconcile_payment      → l10n_do_account_withholding_tax
 
-The OCA `stock_analytic` merge is not here: OCA ships a 19.0 version of it, so its
-code is in the addons path and Odoo loads it whatever this script does. Deleting its
-module row at this point leaves the reflection of its constraints without a module
-and the upgrade dies on `ir_model_constraint.module`. It is merged before any module
-is loaded instead, by `merge_modules_before_load.py` in this same folder, which has to
-be passed to `--pre-upgrade-scripts`. Any other module whose code is still in the
-addons path belongs there too, not in this list.
+The OCA `stock_analytic` merge is not here, and no longer happens at all: OCA ported
+that module to 19.0, so it stays installed as-is and `stock_analytic_distribution_features`
+is not brought in to replace it.
+
+Only merge modules whose code is gone from the addons path of the upgrade branch.
+`util.merge_module` deletes the `ir_module_module` row of the merged module, but Odoo
+builds the module graph before any migration script runs: a module still on disk stays
+a node of that graph, gets loaded after the merge, and its constraint reflection dies on
+`ir_model_constraint.module` being NULL.
 
 Affects (for each merge):
   - ir_module_module          — module registry entry
