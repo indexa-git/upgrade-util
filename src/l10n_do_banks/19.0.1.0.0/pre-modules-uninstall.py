@@ -59,6 +59,8 @@ def uninstall_modules(cr):
         "windies_invoice_template_stock",
         "odoo_document_printer_customization_base",
         "odoo_document_printer",
+        # cecomsa-specific modules
+        "cecomsa_hikvision_attendance",
     ]
 
     _logger.info("Starting uninstall process for %d modules.", len(modules_to_uninstall))
