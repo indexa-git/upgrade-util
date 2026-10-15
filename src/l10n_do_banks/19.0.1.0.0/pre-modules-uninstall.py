@@ -54,6 +54,10 @@ def uninstall_modules(cr):
         "sale_pos_backend_part_number",
         "sale_pos_backend_warranty_reports",
         "sale_pos_session_link",
+        "product_analytic",
+        "product_pricelist_direct_print",
+        "website_sale_suggest_create_account",
+        "website_store_pickup",
         # windiescorp modules discarded during the 13.0 -> 19.0 migration
         "account_multicurrency_reconcile_patch",
         "multiple_delivery_products",
