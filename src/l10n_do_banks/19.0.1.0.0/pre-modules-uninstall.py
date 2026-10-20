@@ -46,6 +46,7 @@ def uninstall_modules(cr):
         "simplify_access_management",
         "stock_mts_mto_rule",
         "pos_lot_selection",
+        "l10n_do_sale_pos_backend",
         "sale_pos_backend",
         "sale_pos_backend_card_bin_promotion",
         "sale_pos_backend_card_bin_promotion_payments",
