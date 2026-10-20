@@ -58,6 +58,7 @@ def uninstall_modules(cr):
         "product_pricelist_direct_print",
         "website_sale_suggest_create_account",
         "website_store_pickup",
+        "stock_inventory_group_by_category",
         # windiescorp modules discarded during the 13.0 -> 19.0 migration
         "account_multicurrency_reconcile_patch",
         "multiple_delivery_products",
