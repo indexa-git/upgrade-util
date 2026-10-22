@@ -72,6 +72,7 @@ def uninstall_modules(cr):
         "website_product_sorting_and_shopping",
         "windies_invoice_template_stock",
         "odoo_document_printer_customization_base",
+        "odoo_document_printer_customization_cecomsa",
         "odoo_document_printer",
     ]
 
