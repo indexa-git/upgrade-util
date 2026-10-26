@@ -1,5 +1,6 @@
 import logging
 from odoo import api, SUPERUSER_ID
+from odoo.upgrade import util
 
 _logger = logging.getLogger(__name__)
 
@@ -22,19 +23,10 @@ def delete_deprecated_crons(cr, xml_ids):
 
 
 def delete_deprecated_views(cr, xml_ids):
-    env = api.Environment(cr, SUPERUSER_ID, {})
     for xml_id in xml_ids:
-        try:
-            view = env.ref(xml_id)
-            if view:
-                try:
-                    view.write({'active': False})
-                    view.unlink()
-                    _logger.info(f"Successfully deleted deprecated view {xml_id}")
-                except Exception as e:
-                    _logger.warning(f"Error deleting deprecated view {xml_id}: {e}")
-        except Exception as e:
-            _logger.warning(f"Error finding deprecated view {xml_id}: {e}")
+        if util.ref(cr, xml_id):
+            util.remove_view(cr, xml_id)
+            _logger.info("Successfully deleted deprecated view %s", xml_id)
 
 
 def migrate(cr, version):
