@@ -101,6 +101,8 @@ def migrate(cr, version):
         _logger.info("All %d cash registers already migrated.", len(cashiers))
         return
 
+    if not done:
+        _keep_loyalty_out_of_pos(cr, env)
     bills = _migrate_bills(cr, env)
     methods = _PaymentMethods(env)
     _ensure_pos_manager_employees(env, {c["company_id"] for c in pending})
@@ -120,6 +122,30 @@ def migrate(cr, version):
     _logger.info("Migrated %d cash register(s) to pos.config.", len(pending) - len(failed))
     if failed:
         _logger.error("%d cash register(s) failed and must be created by hand: %s", len(failed), ", ".join(failed))
+
+
+def _keep_loyalty_out_of_pos(cr, env):
+    """Keep the existing loyalty programs out of the new registers, as in v17.
+
+    ``pos_loyalty`` is auto-installed with ``point_of_sale`` and its ``pos_ok``
+    column defaults to True, so every sales/website program would apply to all
+    registers and block session opening when its reward products are not
+    available in PoS.
+    """
+    if not util.column_exists(cr, "loyalty_program", "pos_ok"):
+        return
+    # Plain SQL: a flag reset on every program, nothing to recompute.
+    cr.execute("UPDATE loyalty_program SET pos_ok = false WHERE pos_ok")
+    count = cr.rowcount
+    if util.table_exists(cr, "loyalty_program_pos_config_rel"):
+        cr.execute("DELETE FROM loyalty_program_pos_config_rel")
+    env.invalidate_all(flush=False)
+    if count:
+        _logger.warning(
+            "%d loyalty program(s) taken out of Point of Sale (they never ran in v17 registers);"
+            " enable them per register if needed.",
+            count,
+        )
 
 
 def _fetch(cr, query, params=None):
