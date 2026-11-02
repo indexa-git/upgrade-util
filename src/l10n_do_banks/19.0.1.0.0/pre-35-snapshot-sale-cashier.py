@@ -13,7 +13,9 @@ gone by then. This script bridges both moments:
      read-only manual text field ``x_legacy_cashier``.
   3. Forces the install of ``point_of_sale``.
 
-Session history (sessions, cash counts, journal controls) is not migrated.
+The sessions and the payment -> session links are also snapshotted for
+``end-36-migrate-sale-cashier-sessions``; cash counts and journal controls are
+kept only for consultation.
 
 Pending decision: keeping ``x_legacy_cashier`` is provisional; whether to keep
 it, extend it or drop it must be discussed with the client.
@@ -27,8 +29,10 @@ _logger = logging.getLogger(__name__)
 
 _MODULE = "sale_pos_backend"
 
-# Legacy tables read by end-35. The m2m names were checked against a real
-# 17.0 database (``payment_id`` / ``refund_id`` are explicit relations).
+# Legacy tables read by end-35 / end-36. The m2m names were checked against a
+# real 17.0 database (``payment_id`` / ``refund_id`` are explicit relations).
+# The cashbox detail and journal control tables have no 19.0 destination; they
+# are kept only for consultation.
 _TABLES = [
     "sale_cashier",
     "cashbox_template",
@@ -39,7 +43,14 @@ _TABLES = [
     "cashbox_template_sale_cashier_rel",
     "sale_cashier_sale_return_reason_rel",
     "sale_return_reason",
+    "sale_cashier_session",
+    "sale_cashier_session_balance",
+    "sale_cashier_session_cashbox_detail",
+    "sale_cashier_journal_control",
+    "sale_cashier_journal_statement",
 ]
+
+_PAYMENT_SESSION_TABLE = "zz_legacy_payment_session"
 
 _FIELD = "x_legacy_cashier"
 _FIELD_LABEL = "Caja / sesión (v17)"
@@ -52,6 +63,7 @@ def migrate(cr, version):
         return
 
     _snapshot_tables(cr)
+    _snapshot_payment_sessions(cr)
     for table, model in _TRACEABILITY_TABLES.items():
         _keep_traceability(cr, table, model)
 
@@ -71,6 +83,40 @@ def _snapshot_tables(cr):
         # Plain copy: the ORM cannot read tables of a module that is going away.
         cr.execute(util.format_query(cr, "CREATE TABLE {} AS SELECT * FROM {}", target, table))
         _logger.info("Snapshot %s -> %s (%d rows).", table, target, cr.rowcount)
+
+
+def _snapshot_payment_sessions(cr):
+    """Keep the payment -> v17 session link that end-36 writes as ``pos_session_id``.
+
+    The upgrade platform drops ``account_payment.session_id`` (gone in the
+    CECOMSA build), but the payment's own journal entry still carries it in
+    ``account_move.session_id``. Payments whose entry has no session are left
+    unlinked: their session is never guessed.
+    """
+    if util.table_exists(cr, _PAYMENT_SESSION_TABLE):
+        _logger.info("%s already exists; keeping the first snapshot.", _PAYMENT_SESSION_TABLE)
+        return
+    if not util.column_exists(cr, "account_move", "session_id"):
+        _logger.warning("account_move has no session column; payments will not be linked to sessions.")
+        return
+    source = "m.session_id"
+    if util.column_exists(cr, "account_payment", "session_id"):
+        source = "COALESCE(p.session_id, m.session_id)"
+    cr.execute(
+        util.format_query(
+            cr,
+            """
+            CREATE TABLE {table} AS
+            SELECT p.id AS payment_id, {source} AS session_id
+              FROM account_payment p
+              JOIN account_move m ON m.id = p.move_id
+             WHERE {source} IS NOT NULL
+            """,
+            table=_PAYMENT_SESSION_TABLE,
+            source=util.SQLStr(source),
+        )
+    )
+    _logger.info("Snapshot payment -> session links -> %s (%d rows).", _PAYMENT_SESSION_TABLE, cr.rowcount)
 
 
 def _keep_traceability(cr, table, model):
