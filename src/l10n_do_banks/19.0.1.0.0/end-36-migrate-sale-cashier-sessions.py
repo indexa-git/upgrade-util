@@ -99,7 +99,11 @@ def _insert_sessions(cr):
                     cash_register_balance_end_real, rescue, update_stock_at_closing,
                     create_uid, create_date, write_uid, write_date
                 )
-                SELECT l.new_id, l.pos_config_id, l.user_id, l.name, 'closed', l.opening_date, l.closing_date,
+                -- A closed session needs both dates: pos.config sorts by stop_at desc
+                -- (NULLs first) and crashes on a missing one. Some v17 sessions lack them.
+                SELECT l.new_id, l.pos_config_id, l.user_id, l.name, 'closed',
+                       coalesce(l.opening_date, l.create_date),
+                       coalesce(l.closing_date, l.write_date, l.opening_date, l.create_date),
                        cj.journal_id, coalesce(l.cash_register_opening_balance, 0),
                        coalesce(l.cash_register_balance_current, 0),
                        b.cash_register_balance_end, false, false,
