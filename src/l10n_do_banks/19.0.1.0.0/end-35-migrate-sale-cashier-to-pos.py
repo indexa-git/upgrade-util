@@ -20,11 +20,6 @@ found before go-live):
     only (active first, then lowest id): native POS forbids one cash method in
     several registers. Some of these journals are not real cash (withholdings,
     exchange difference) and must be reviewed one by one.
-
-TODO: analyse the employee unarchiving done by ``_ensure_pos_manager_employees``.
-It changes client HR data only so ``pos_hr`` does not hit ``hr_employee_user_uniq``
-(it would otherwise create a duplicate employee for that user); decide with the
-client whether to keep it, or to fix the employees by hand before the upgrade.
 """
 
 import logging
@@ -105,7 +100,6 @@ def migrate(cr, version):
         _keep_loyalty_out_of_pos(cr, env)
     bills = _migrate_bills(cr, env)
     methods = _PaymentMethods(env)
-    _ensure_pos_manager_employees(env, {c["company_id"] for c in pending})
     failed = []
     for cashier in pending:
         # One broken register must not abort the whole upgrade.
@@ -236,37 +230,6 @@ class _PaymentMethods:
         for journal_id, owner in list(self.cash_owner.items()):
             if owner["id"] == cashier["id"]:
                 del self.cash_owner[journal_id]
-
-
-def _ensure_pos_manager_employees(env, company_ids):
-    """Unarchive a PoS manager's employee where ``pos_hr`` would otherwise duplicate it.
-
-    On every ``pos.config`` write, ``pos_hr`` creates an employee for a PoS manager
-    when none has an active one in the company. ``user.employee_id`` ignores
-    archived employees but ``hr_employee_user_uniq`` does not, so an archived
-    employee makes every register creation fail.
-    """
-    if "hr.employee" not in env:
-        return
-    managers = env.ref("point_of_sale.group_pos_manager").sudo().user_ids
-    Employee = env["hr.employee"].sudo().with_context(active_test=False)
-    for company in env["res.company"].browse(sorted(company_ids)).exists():
-        users = managers.filtered(lambda u, c=company: c in u.company_ids)
-        employees = Employee.search([("user_id", "in", users.ids), ("company_id", "=", company.id)])
-        if not users or employees.filtered("active"):
-            continue
-        # TODO: analyse with the client (see module docstring).
-        # One is enough: pos_hr only needs a single active manager employee.
-        for employee in employees[:1]:
-            employee.active = True
-            _logger.warning(
-                "Employee '%s' (id %d) of PoS manager '%s' unarchived in company '%s': pos_hr needs an"
-                " active employee per PoS manager and would otherwise violate hr_employee_user_uniq.",
-                employee.name,
-                employee.id,
-                employee.user_id.login,
-                company.name,
-            )
 
 
 def _migrate_cashier(cr, env, cashier, bills, methods):
