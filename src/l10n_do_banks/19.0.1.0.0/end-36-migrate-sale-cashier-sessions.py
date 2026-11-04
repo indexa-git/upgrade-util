@@ -33,7 +33,7 @@ _PAYMENT_SESSION = "zz_legacy_payment_session"
 
 def migrate(cr, version):
     if not (util.table_exists(cr, "zz_legacy_sale_cashier_session") and util.table_exists(cr, _CONFIG_MAP)):
-        _logger.info("No sale_cashier_session snapshot or register map; nothing to migrate.")
+        _logger.info("No sale_cashier_session snapshot or register map (see pre-35); nothing to migrate.")
         return
 
     cr.execute(
