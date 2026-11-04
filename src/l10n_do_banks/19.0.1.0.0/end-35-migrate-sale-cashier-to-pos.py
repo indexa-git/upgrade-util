@@ -74,7 +74,7 @@ _MAP_TABLE = "zz_legacy_cashier_pos_config_map"
 
 def migrate(cr, version):
     if not util.table_exists(cr, "zz_legacy_sale_cashier"):
-        _logger.info("No sale_cashier snapshot; nothing to migrate.")
+        _logger.info("No sale_cashier snapshot (see pre-35); nothing to migrate.")
         return
     env = util.env(cr)
     if "pos.config" not in env:

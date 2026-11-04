@@ -17,6 +17,10 @@ The sessions and the payment -> session links are also snapshotted for
 ``end-36-migrate-sale-cashier-sessions``; cash counts and journal controls are
 kept only for consultation.
 
+Nothing runs when ``point_of_sale`` is already installed: the database already
+has its own registers and sessions, and without the snapshot the ``end-`` scripts
+do nothing either.
+
 Pending decision: keeping ``x_legacy_cashier`` is provisional; whether to keep
 it, extend it or drop it must be discussed with the client.
 """
@@ -60,6 +64,9 @@ _TRACEABILITY_TABLES = {"account_move": "account.move", "account_payment": "acco
 def migrate(cr, version):
     if not util.module_installed(cr, _MODULE):
         _logger.info("%s is not installed; nothing to snapshot.", _MODULE)
+        return
+    if util.module_installed(cr, "point_of_sale"):
+        _logger.warning("point_of_sale is already installed; %s registers and sessions are NOT migrated.", _MODULE)
         return
 
     _snapshot_tables(cr)
