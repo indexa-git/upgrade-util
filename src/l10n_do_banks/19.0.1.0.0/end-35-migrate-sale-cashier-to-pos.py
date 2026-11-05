@@ -25,6 +25,7 @@ found before go-live):
 import logging
 
 from odoo import Command
+from odoo.tools import mute_logger
 
 from odoo.upgrade import util
 
@@ -102,12 +103,15 @@ def migrate(cr, version):
     methods = _PaymentMethods(env)
     failed = []
     for cashier in pending:
-        # One broken register must not abort the whole upgrade.
+        # One broken register must not abort the whole upgrade; failures are warnings
+        # (with traceback) so they do not mark the upgrade as failed.
         try:
-            with util.savepoint(cr):
+            with util.savepoint(cr), mute_logger("odoo.sql_db"):
                 _migrate_cashier(cr, env, cashier, bills, methods)
         except Exception:
-            _logger.exception("Cash register '%s' (sale.cashier %d) NOT migrated.", cashier["name"], cashier["id"])
+            _logger.warning(
+                "Cash register '%s' (sale.cashier %d) NOT migrated.", cashier["name"], cashier["id"], exc_info=True
+            )
             env.invalidate_all(flush=False)
             methods.release(cashier)
             failed.append(cashier["name"])
@@ -115,7 +119,7 @@ def migrate(cr, version):
     _report_refund_reasons(cr)
     _logger.info("Migrated %d cash register(s) to pos.config.", len(pending) - len(failed))
     if failed:
-        _logger.error("%d cash register(s) failed and must be created by hand: %s", len(failed), ", ".join(failed))
+        _logger.warning("%d cash register(s) failed and must be created by hand: %s", len(failed), ", ".join(failed))
 
 
 def _keep_loyalty_out_of_pos(cr, env):
