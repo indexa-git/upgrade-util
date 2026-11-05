@@ -99,6 +99,7 @@ def migrate(cr, version):
 
     if not done:
         _keep_loyalty_out_of_pos(cr, env)
+    _ensure_pos_manager_employee(env, {c["company_id"] for c in pending})
     bills = _migrate_bills(cr, env)
     methods = _PaymentMethods(env)
     failed = []
@@ -144,6 +145,83 @@ def _keep_loyalty_out_of_pos(cr, env):
             " enable them per register if needed.",
             count,
         )
+
+
+def _ensure_pos_manager_employee(env, company_ids):
+    """Give each company a PoS Administrator linked to an active employee.
+
+    ``pos_hr`` (auto-installed) runs on every ``pos.config`` write: when no user
+    explicitly in the PoS Administrator group has an employee in the register's
+    company, it creates one for the first of them. That breaks when the user's
+    only employee is archived (unique user/company), and every register fails.
+    The lowest-id Settings administrator with an active employee in the company
+    gets the group. When none has one, the lowest-id administrator with an active
+    employee elsewhere gets a new active one there (archiving it would bring the
+    problem back on the next register write).
+    """
+    if "advanced_employee_ids" not in env["pos.config"]._fields:
+        return
+    manager_group = env.ref("point_of_sale.group_pos_manager")
+    admin_group = env.ref("base.group_system")
+    Employee = env["hr.employee"].sudo()
+    admin_domain = [
+        ("user_id.active", "=", True),
+        ("user_id.share", "=", False),
+        ("user_id.all_group_ids", "in", admin_group.id),
+    ]
+    for company in env["res.company"].browse(sorted(company_ids)):
+        # Same lookup as pos_hr: explicit group members with access to the company.
+        managers = manager_group.user_ids.filtered(lambda user, company=company: company in user.company_ids)
+        if Employee.search_count([("user_id", "in", managers.ids), ("company_id", "=", company.id)], limit=1):
+            continue
+        in_company = [*admin_domain, ("user_id.company_ids", "in", company.id)]
+        user = Employee.search([*in_company, ("company_id", "=", company.id)]).user_id.sorted("id")[:1]
+        if not user:
+            user = _create_company_employee(env, company, Employee.search(in_company).user_id.sorted("id"))
+        if not user:
+            _logger.warning(
+                "Company '%s' has no administrator to link to an employee; pos_hr will try to create one"
+                " and its registers may fail.",
+                company.name,
+            )
+            continue
+        if user in manager_group.user_ids:
+            continue
+        user.group_ids = [Command.link(manager_group.id)]
+        _logger.warning(
+            "User '%s' (id %d) added to PoS Administrator for company '%s': pos_hr needs a manager"
+            " with an active employee to create the registers.",
+            user.name,
+            user.id,
+            company.name,
+        )
+
+
+def _create_company_employee(env, company, candidates):
+    """Create an active employee in ``company`` for the first of ``candidates``.
+
+    Users with an employee there, even archived, are skipped: a second one breaks
+    the unique user/company constraint.
+    """
+    taken = (
+        env["hr.employee"]
+        .sudo()
+        .with_context(active_test=False)
+        .search([("company_id", "=", company.id), ("user_id", "in", candidates.ids)])
+        .user_id
+    )
+    user = (candidates - taken)[:1]
+    if not user:
+        return user
+    try:
+        with util.savepoint(env.cr):
+            user.with_company(company).action_create_employee()
+    except Exception:
+        _logger.warning("Could not create an employee for '%s' in '%s'.", user.name, company.name, exc_info=True)
+        env.invalidate_all(flush=False)
+        return user.browse()
+    _logger.warning("Employee created for '%s' (id %d) in company '%s'.", user.name, user.id, company.name)
+    return user
 
 
 def _fetch(cr, query, params=None):
