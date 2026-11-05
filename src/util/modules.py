@@ -26,6 +26,7 @@ from operator import itemgetter
 try:
     import odoo
     from odoo.modules.db import create_categories
+    from odoo.modules.module import get_module_path
     from odoo.tools.func import frame_codeinfo
     from odoo.tools.misc import topological_sort
 
@@ -37,6 +38,7 @@ except ImportError:
     import openerp as odoo
     from openerp.modules import load_information_from_description_file as get_manifest
     from openerp.modules.db import create_categories
+    from openerp.modules.module import get_module_path
     from openerp.tools.func import frame_codeinfo
 
     try:
@@ -715,7 +717,7 @@ def _force_install_module(cr, module, if_installed=None, reason="it has been exp
               FROM ir_module_module_dependency d
               JOIN ir_module_module on_me ON on_me.id = d.module_id
               JOIN ir_module_module_dependency e ON e.module_id = on_me.id
-              JOIN ir_module_module its_deps ON its_deps.name = e.name
+         LEFT JOIN ir_module_module its_deps ON its_deps.name = e.name
                 {}
              WHERE d.name = ANY(%s)
                AND on_me.state = 'uninstalled'
@@ -725,14 +727,20 @@ def _force_install_module(cr, module, if_installed=None, reason="it has been exp
           GROUP BY on_me.name
             HAVING
                    -- are all dependencies (to be) installed?
-                   array_agg(its_deps.state)::text[] <@ %s
+                   array_agg(COALESCE(its_deps.state, 'unknown'))::text[] <@ %s
                 {}
 
         """.format(country_join, dep_match, cat_match, country_match),
             [toinstall, list(INSTALLED_MODULE_STATES)],
         )
         for (mod,) in cr.fetchall():
-            if mod in ENVIRON["__modules_to_skip_autoinstall"]:
+            if not _module_code_available(mod):
+                _logger.warning(
+                    "Module %r won't be auto installed by the force install of %r because its code is not available.",
+                    mod,
+                    module,
+                )
+            elif mod in ENVIRON["__modules_to_skip_autoinstall"]:
                 _logger.info(
                     (
                         "Module %r won't be auto installed because its original dependencies were already installed. "
@@ -754,6 +762,11 @@ def _force_install_module(cr, module, if_installed=None, reason="it has been exp
     # TODO handle module exclusions
 
     return states.get(module)
+
+
+def _module_code_available(module):
+    kw = {} if version_gte("saas~18.5") else {"downloaded": False}
+    return bool(get_module_path(module, display_warning=False, **kw))
 
 
 def _assert_modules_exists(cr, *modules, **kwargs):
@@ -910,7 +923,7 @@ def _get_autoinstallable_modules(cr, module=None):
             SELECT m.name
               FROM ir_module_module_dependency d
               JOIN ir_module_module m ON m.id = d.module_id
-              JOIN ir_module_module md ON md.name = d.name
+         LEFT JOIN ir_module_module md ON md.name = d.name
                 {}
              WHERE {}
                AND m.state = 'uninstalled'
@@ -918,7 +931,7 @@ def _get_autoinstallable_modules(cr, module=None):
                AND {}
                AND {}
           GROUP BY m.id
-            HAVING bool_and(md.state IN %s)
+            HAVING bool_and(COALESCE(md.state, 'unknown') IN %s)
                 {}
             """,
         SQLStr(country_join),
