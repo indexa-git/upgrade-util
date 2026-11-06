@@ -72,6 +72,9 @@ _LOST_FIELDS = [
 
 _MAP_TABLE = "zz_legacy_cashier_pos_config_map"
 
+# Integrator accounts that must never be picked as the PoS manager.
+_EXCLUDED_LOGINS = ("iterativo-admin",)
+
 
 def migrate(cr, version):
     if not util.table_exists(cr, "zz_legacy_sale_cashier"):
@@ -164,7 +167,11 @@ def _ensure_pos_manager_employee(env, company_ids):
     manager_group = env.ref("point_of_sale.group_pos_manager")
     admin_group = env.ref("base.group_system")
     Employee = env["hr.employee"].sudo()
+    # Never default to the integrator's own admin account.
+    excluded = env["res.users"].with_context(active_test=False).search([("login", "in", _EXCLUDED_LOGINS)])
+    excluded |= env.ref("base.user_admin", raise_if_not_found=False) or excluded.browse()
     admin_domain = [
+        ("user_id", "not in", excluded.ids),
         ("user_id.active", "=", True),
         ("user_id.share", "=", False),
         ("user_id.all_group_ids", "in", admin_group.id),
