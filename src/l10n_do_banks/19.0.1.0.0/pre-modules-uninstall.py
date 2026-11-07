@@ -74,6 +74,8 @@ def uninstall_modules(cr):
         "odoo_document_printer_customization_base",
         "odoo_document_printer_customization_cecomsa",
         "odoo_document_printer",
+        # no longer used; no code in 19.0
+        "l10n_do_document_pools_pre_migration_scripts",
     ]
 
     _logger.info("Starting uninstall process for %d modules.", len(modules_to_uninstall))
