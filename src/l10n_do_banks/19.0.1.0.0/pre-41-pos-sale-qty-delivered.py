@@ -30,7 +30,7 @@ def migrate(cr, version):
           FROM pos_order pos_order
      LEFT JOIN shipped_order ON shipped_order.order_id = pos_order.id
          WHERE line.order_id = pos_order.id
-           AND pos_order.state IN ('paid', 'done')
+           AND pos_order.state IN ('paid', 'done', 'invoiced')
            AND (pos_order.shipping_date IS NULL OR shipped_order.order_id IS NULL)
         """
     )
