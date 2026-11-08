@@ -5,14 +5,24 @@ from odoo.upgrade import util
 _logger = logging.getLogger(__name__)
 
 
-def _pos_sale_to_install(cr):
-    cr.execute("SELECT 1 FROM ir_module_module WHERE name = 'pos_sale' AND state = 'to install'")
+def _pos_sale_installs_over(cr, module):
+    cr.execute(
+        """
+        SELECT 1
+          FROM ir_module_module pos_sale
+          JOIN ir_module_module base_module ON base_module.name = %s
+         WHERE pos_sale.name = 'pos_sale'
+           AND pos_sale.state = 'to install'
+           AND base_module.state IN ('installed', 'to upgrade')
+        """,
+        [module],
+    )
     return bool(cr.rowcount)
 
 
 def migrate(cr, version):
     if (
-        not _pos_sale_to_install(cr)
+        not _pos_sale_installs_over(cr, "sale")
         or util.column_exists(cr, "sale_order", "amount_unpaid")
         or util.column_exists(cr, "pos_order_line", "sale_order_line_id")
     ):
@@ -54,14 +64,18 @@ def migrate(cr, version):
         )
         UPDATE sale_order so
            SET amount_unpaid = GREATEST(
-                   ROUND(
-                       (COALESCE(base.amount_total, 0) - COALESCE(invoiced.amount, 0) - COALESCE(tx_paid.amount, 0))
-                       / cur.rounding
-                   ) * cur.rounding,
+                   CASE
+                       WHEN cur.rounding > 0
+                       THEN ROUND(
+                           (COALESCE(base.amount_total, 0) - COALESCE(invoiced.amount, 0) - COALESCE(tx_paid.amount, 0))
+                           / cur.rounding
+                       ) * cur.rounding
+                       ELSE COALESCE(base.amount_total, 0) - COALESCE(invoiced.amount, 0) - COALESCE(tx_paid.amount, 0)
+                   END,
                    0
                )
           FROM sale_order base
-          JOIN res_currency cur ON cur.id = base.currency_id
+     LEFT JOIN res_currency cur ON cur.id = base.currency_id
      LEFT JOIN invoiced ON invoiced.order_id = base.id
      LEFT JOIN tx_paid ON tx_paid.order_id = base.id
          WHERE so.id = base.id
