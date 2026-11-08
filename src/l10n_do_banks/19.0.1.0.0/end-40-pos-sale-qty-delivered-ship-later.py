@@ -9,14 +9,14 @@ BATCH_SIZE = 500
 
 def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    if "qty_delivered" not in env["pos.order.line"]._fields:
+    if "pos.order.line" not in env or "qty_delivered" not in env["pos.order.line"]._fields:
         return
 
     cr.execute(
         """
         SELECT pos_order.id
           FROM pos_order
-         WHERE pos_order.state IN ('paid', 'done')
+         WHERE pos_order.state IN ('paid', 'done', 'invoiced')
            AND pos_order.shipping_date IS NOT NULL
            AND EXISTS (
                SELECT 1
