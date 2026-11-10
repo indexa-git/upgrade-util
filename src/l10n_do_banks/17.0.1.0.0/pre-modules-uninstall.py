@@ -148,6 +148,8 @@ def uninstall_modules(cr):
         'stock_inventory_chatter',
         'cecomsa_account_followup',
         'odoo_document_invoice_report',
+        # absorbed by l10n_do_accounting; no code from 17.0 on
+        'l10n_do_debit_note',
     ]
 
     _logger.info(f'Starting uninstall process for {len(modules_to_uninstall)} modules.')
