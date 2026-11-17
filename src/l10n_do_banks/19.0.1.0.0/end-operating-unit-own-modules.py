@@ -42,6 +42,34 @@ def migrate(cr, version):
         cr.execute("UPDATE ir_module_module SET state = 'to upgrade' WHERE name = %s", [new])
         _logger.info("Module %s replaced by %s", old, new)
 
+    if _registry_reload_is_scheduled(cr):
+        logging.getLogger("odoo.modules.loading").addFilter(
+            _PendingUpgradeIsExpected(MODULE_MAP[old] for old in installed)
+        )
+
+
+def _registry_reload_is_scheduled(cr):
+    cr.execute("SELECT 1 FROM ir_module_module WHERE state = 'to remove' LIMIT 1")
+    return bool(cr.rowcount)
+
+
+class _PendingUpgradeIsExpected(logging.Filter):
+    def __init__(self, modules):
+        super().__init__()
+        self.modules = set(modules)
+
+    def filter(self, record):
+        pending = record.args[0] if isinstance(record.args, tuple) and record.args else None
+        if (
+            record.levelno == logging.ERROR
+            and "inconsistent states" in str(record.msg)
+            and isinstance(pending, list)
+            and set(pending) <= self.modules
+        ):
+            record.levelno = logging.WARNING
+            record.levelname = logging.getLevelName(logging.WARNING)
+        return True
+
 
 def _installed_dependers(cr, modules):
     cr.execute(
